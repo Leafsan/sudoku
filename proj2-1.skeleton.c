@@ -72,12 +72,17 @@ void *check_columns(void *arg)
  */
 void *check_subgrid(void *arg)
 {
-    int i, j, n = 0, check[9] = {0,};
+    int i, n = 0, check[9] = {0,};
+	valid[2][arg] = 1;
 	for (i = 0; i < 9; i++) {
-		valid[2][i] = 1;
-		for (j = 0; j < 9; j++) {
-			check[sudoku[]]++;
+		check[sudoku[(arg / 3) * 3 + i / 3][(arg % 3) * 3 + i % 3]]++;
+	}
+	while (n < 9) {
+		if (check[n] != 1) {
+			valid[2][arg] = 0;
+			break;
 		}
+		n++;
 	}
 }
 
