@@ -73,13 +73,14 @@ void *check_columns(void *arg)
 void *check_subgrid(void *arg)
 {
     int i, n = 0, check[9] = {0,};
+	int subGridNum = *(int *) arg;
 	valid[2][arg] = 1;
 	for (i = 0; i < 9; i++) {
-		check[sudoku[(arg / 3) * 3 + i / 3][(arg % 3) * 3 + i % 3]]++;
+		check[sudoku[(subGridNum / 3) * 3 + i / 3][(subGridNum % 3) * 3 + i % 3]]++;
 	}
 	while (n < 9) {
 		if (check[n] != 1) {
-			valid[2][arg] = 0;
+			valid[2][subGridNum] = 0;
 			break;
 		}
 		n++;
@@ -93,7 +94,8 @@ void *check_subgrid(void *arg)
  */
 void check_sudoku(void)
 {
-    int i, j;
+	pthread_t p_thread;
+    int i, j, n;
     
     /*
      * 검증하기 전에 먼저 스도쿠 퍼즐의 값을 출력한다.
@@ -107,20 +109,22 @@ void check_sudoku(void)
     /*
      * 스레드를 생성하여 각 행을 검사하는 check_rows() 함수를 실행한다.
      */
-    // 여기를 완성하세요
-    /*
+    pthread_create(&p_thread, NULL, check_rows, NULL);
+	/*
      * 스레드를 생성하여 각 열을 검사하는 check_columns() 함수를 실행한다.
      */
-    // 여기를 완성하세요
+    pthread_create(&p_thread, NULL, check_columns, NULL);
     /*
      * 9개의 스레드를 생성하여 각 3x3 서브그리드를 검사하는 check_subgrid() 함수를 실행한다.
      * 3x3 서브그리드의 위치를 식별할 수 있는 값을 함수의 인자로 넘긴다.
      */
-    // 여기를 완성하세요
+    for (n = 0; n < 9; n++)
+		pthread_create(&p_thread, NULL, check_subgrid, n);
+	
     /*
      * 11개의 스레드가 종료할 때까지 기다린다.
      */
-    // 여기를 완성하세요
+    pthread_join(p_thread, NULL);
     /*
      * 각 행에 대한 검증 결과를 출력한다.
      */
