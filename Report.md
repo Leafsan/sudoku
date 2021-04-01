@@ -323,6 +323,10 @@ pthread.h 헤더파일을 가진 프로그램을 gcc로 컴파일 하기위해�
 * 동적 검사
 <img src="https://raw.githubusercontent.com/Leafsan/sudoku/master/Report/02.png">
 스도쿠 퍼즐을 셔플 중인 스레드가 작동한 이후에 검증을 곧바로 시작했는데도 여전히 셔플 직전의 정렬된 스도쿠 퍼즐이 나오게 된다. 예상과는 사뭇 다른 동작이 발생했다. 셔플 도중에 읽기와 쓰기가 일어날 것이라 생각했는데 셔플 이전에 검증을 미리 끝낸 후에 셔플이 완료되는 동작을 보여주고 있다.
+<img src="https://raw.githubusercontent.com/Leafsan/sudoku/master/Report/03.png">
+그래서 약간의 시간차를 주기 위해서 셔플과 검증 함수 사이에 usleep(1)을 넣어 보았다.
+<img src="https://raw.githubusercontent.com/Leafsan/sudoku/master/Report/04.png">
+그 결과는 처음과 달리 셔플 이후에 검증이 이루어지게 되었다. usleep으로 준 시간차 정도로는 부족했던 것으로 생각된다. 일단은 이 결과로 스레드가 생성되고 실행되고 있다고 판단을 할 수 있다고 생각한다.
 
 ## 결론
 동적 검사 부분에서 일반적으로 생각하는 방식과는 달리 작동하는 것에 약간 의구심이 들지만 작동 자체는 잘 되고 있는 것을 볼 수 있었다.
