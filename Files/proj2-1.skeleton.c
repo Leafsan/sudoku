@@ -27,18 +27,19 @@ void *check_rows(void *arg)
 {
 	int i, j, n = 0;
 	for (i = 0; i < 9; i++) {
-		int check[9] = {0 ,};
-		valid[0][i] = 1;
+		int check[9] = {0 ,};				//check[n] keeps how many times the number n appears.
+		valid[0][i] = 1;					//First, make valid[0][i] values to 1
 		for (j = 0; j < 9; j++) {
-			check[sudoku[i][j] - 1] += 1;
+			check[sudoku[i][j] - 1] += 1;	//number of sudoku[i][j](row) checked, value of check increased.
 		}
-		for (n = 0; n < 9; n++) {
+		for (n = 0; n < 9; n++) {			//if there is more or less than 1 value in check[n], then the valid value become 0(false)
 			if (check[n] != 1) {
 				valid[0][i] = 0;
 				break;
 			}
 		}
-		n = 0;
+		//reinitialize n into 0 for next row check.
+		n = 0; 
 	}
 }
 
@@ -49,19 +50,19 @@ void *check_rows(void *arg)
 void *check_columns(void *arg)
 {
 	int i, j, n = 0; 
-	for (i = 0; i < 9; i++) {
-		int check[9] = {0, };
-		valid[1][i] = 1;
+	for (i = 0; i < 9; i++) {				
+		int check[9] = {0, };				//check[n] keeps how many times the number n appears.	
+		valid[1][i] = 1;					//First, make valid[1][i] values to 1
 		for (j = 0; j < 9; j++) {
-			check[sudoku[j][i] - 1] += 1;
+			check[sudoku[j][i] - 1] += 1;	//number of sudoku[j][i](column) checked, value of check increased.
 		}
-		while (n < 9) {
+		for (n = 0; n < 9; n++) {			//if there is more or less than 1 value in check[n], then the valid value become 0(false)
 			if (check[n] != 1) {
 				valid[1][i] = 0;
 				break;
 			}
-			n++;
 		}
+		//reinitialize n into 0 for next row check.
 		n = 0;
 	}
 }
@@ -74,18 +75,17 @@ void *check_columns(void *arg)
 void *check_subgrid(void *arg)
 {
     int i, n = 0, check[9] = {0, };
-	int subGridNum = *(int *) arg;
-	free(arg);
+	int subGridNum = *(int *) arg;		//get arg as int pointer value.
+	free(arg);							//free arg pointer to prevent memory leak.
 	valid[2][subGridNum] = 1;
 	for (i = 0; i < 9; i++) {
-		check[sudoku[(subGridNum / 3) * 3 + i / 3][(subGridNum % 3) * 3 + i % 3] - 1] += 1;
+		check[sudoku[(subGridNum / 3) * 3 + i / 3][(subGridNum % 3) * 3 + i % 3] - 1] += 1;	// find subgrid and its number for check.
 	}
-	while (n < 9) {
+	for (n = 0; n < 9; n++) {			//if there is more or less than 1 value in check[n], then the valid value become 0(false)
 		if (check[n] != 1) {
 			valid[2][subGridNum] = 0;
 			break;
 		}
-		n++;
 	}
 }
 
@@ -96,9 +96,8 @@ void *check_subgrid(void *arg)
  */
 void check_sudoku(void)
 {
-	pthread_t p_thread[11];
+	pthread_t p_thread[11];		//thread for check_rows, check_columns, check_subgrid
     int i, j;
-	int index[9] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     
     /*
      * 검증하기 전에 먼저 스도쿠 퍼즐의 값을 출력한다.
@@ -122,14 +121,10 @@ void check_sudoku(void)
      * 3x3 서브그리드의 위치를 식별할 수 있는 값을 함수의 인자로 넘긴다.
      */
 	for (i = 0; i < 9; i++) {
-		int *ptr = malloc(sizeof(int));
-		*ptr = i;
+		int *ptr = malloc(sizeof(int));		//pointer for save loop input value
+		*ptr = i;							//save loop input into pointer ptr
 		pthread_create(&p_thread[i + 2], NULL, check_subgrid, ptr);
 	}
-
-//	for (numThread = 0; numThread<9; numThread++)
-//		pthread_create(&p_thread[2], NULL, check_subgrid, (void*) (&index[numThread]));
-
     /*
      * 11개의 스레드가 종료할 때까지 기다린다.
      */
