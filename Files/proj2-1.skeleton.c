@@ -41,6 +41,7 @@ void *check_rows(void *arg)
 		//reinitialize n into 0 for next row check.
 		n = 0; 
 	}
+	pthread_exit(NULL);		//end thread
 }
 
 /*
@@ -65,6 +66,7 @@ void *check_columns(void *arg)
 		//reinitialize n into 0 for next row check.
 		n = 0;
 	}
+	pthread_exit(NULL);		//end thread
 }
 
 /*
@@ -87,6 +89,7 @@ void *check_subgrid(void *arg)
 			break;
 		}
 	}
+	pthread_exit(NULL);		//end thread
 }
 
 /*
@@ -111,11 +114,17 @@ void check_sudoku(void)
     /*
      * 스레드를 생성하여 각 행을 검사하는 check_rows() 함수를 실행한다.
      */
-    pthread_create(&p_thread[0], NULL, check_rows, NULL);
+	if (pthread_create(&p_thread[0], NULL, check_rows, NULL) != 0) {
+        fprintf(stderr, "pthread_create error: check_rows\n");
+        exit(-1);
+    }
 	/*
      * 스레드를 생성하여 각 열을 검사하는 check_columns() 함수를 실행한다.
      */
-    pthread_create(&p_thread[1], NULL, check_columns, NULL);
+	if (pthread_create(&p_thread[1], NULL, check_columns, NULL) != 0) {
+        fprintf(stderr, "pthread_create error: check_columns\n");
+        exit(-1);
+    }
     /*
      * 9개의 스레드를 생성하여 각 3x3 서브그리드를 검사하는 check_subgrid() 함수를 실행한다.
      * 3x3 서브그리드의 위치를 식별할 수 있는 값을 함수의 인자로 넘긴다.
@@ -123,7 +132,11 @@ void check_sudoku(void)
 	for (i = 0; i < 9; i++) {
 		int *ptr = malloc(sizeof(int));		//pointer for save loop input value
 		*ptr = i;							//save loop input into pointer ptr
-		pthread_create(&p_thread[i + 2], NULL, check_subgrid, ptr);
+		if (pthread_create(&p_thread[2+i], NULL, check_subgrid, ptr) != 0) {
+        	fprintf(stderr, "pthread_create error: check_columns\n");
+			free(ptr);		//prevent memory leak
+        	exit(-1);
+    	}
 	}
     /*
      * 11개의 스레드가 종료할 때까지 기다린다.
